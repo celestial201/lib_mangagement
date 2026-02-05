@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { BookOpen, CreditCard, BadgeCheck } from 'lucide-react'
+import { BookOpen, CreditCard, BadgeCheck, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -10,12 +10,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { LibraryCard, type LibraryCardData } from '@/components/library-card'
-import { MembershipForm, getStoredMember } from '@/components/membership-form'
+import { MembershipForm, getStoredMember, setStoredMember } from '@/components/membership-form'
 
 export function Header() {
   const [showMembershipForm, setShowMembershipForm] = useState(false)
   const [showMyCard, setShowMyCard] = useState(false)
   const [member, setMember] = useState<LibraryCardData | null>(null)
+  const [isCancelling, setIsCancelling] = useState(false)
 
   useEffect(() => {
     setMember(getStoredMember())
@@ -23,6 +24,32 @@ export function Header() {
 
   const handleMembershipSuccess = () => {
     setMember(getStoredMember())
+  }
+
+  const handleCancelMembership = async () => {
+    if (!member || isCancelling) return
+
+    setIsCancelling(true)
+    try {
+      const res = await fetch(
+        `/api/members?email=${encodeURIComponent(member.email)}`,
+        { method: 'DELETE' }
+      )
+
+      if (!res.ok) {
+        // Optionally, you could surface an error UI here
+        console.error('Failed to cancel membership')
+        return
+      }
+
+      setStoredMember(null)
+      setMember(null)
+      setShowMyCard(false)
+    } catch (err) {
+      console.error('Error cancelling membership', err)
+    } finally {
+      setIsCancelling(false)
+    }
   }
 
   return (
@@ -88,9 +115,23 @@ export function Header() {
             <DialogTitle>Your library card</DialogTitle>
           </DialogHeader>
           {member && (
-            <div className="flex justify-center py-2">
-              <LibraryCard member={member} />
-            </div>
+            <>
+              <div className="flex justify-center py-2">
+                <LibraryCard member={member} />
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="gap-2"
+                  onClick={handleCancelMembership}
+                  disabled={isCancelling}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {isCancelling ? 'Cancelling...' : 'Cancel membership'}
+                </Button>
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>

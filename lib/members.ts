@@ -75,3 +75,16 @@ export async function getMemberByEmail(email: string): Promise<Member | null> {
   const members = await loadMembers()
   return members.find((m) => m.email.toLowerCase() === email.toLowerCase()) ?? null
 }
+
+export async function deleteMemberByEmail(email: string): Promise<boolean> {
+  const members = await loadMembers()
+  const normalized = email.toLowerCase()
+  const remaining = members.filter((m) => m.email.toLowerCase() !== normalized)
+
+  if (remaining.length === members.length) {
+    return false
+  }
+
+  await saveMembers(remaining)
+  return true
+}

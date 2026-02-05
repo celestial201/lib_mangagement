@@ -1,4 +1,4 @@
-import { createMember, getMemberByCardNumber } from '@/lib/members'
+import { createMember, getMemberByCardNumber, deleteMemberByEmail } from '@/lib/members'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
@@ -47,4 +47,32 @@ export async function GET(req: Request) {
   }
 
   return NextResponse.json(member)
+}
+
+export async function DELETE(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const email = searchParams.get('email')
+
+  if (!email) {
+    return NextResponse.json(
+      { error: 'email query parameter is required' },
+      { status: 400 }
+    )
+  }
+
+  try {
+    const deleted = await deleteMemberByEmail(email)
+
+    if (!deleted) {
+      return NextResponse.json(
+        { error: 'Membership not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to cancel membership'
+    return NextResponse.json({ error: message }, { status: 400 })
+  }
 }
