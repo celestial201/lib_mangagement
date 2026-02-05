@@ -37,6 +37,22 @@ All API keys are securely managed using environment variables and are not expose
 
 
 
+
+## ✨ Current Status
+- Intelligent chatbot for book discovery
+- Clean and modular project structure
+- Runs locally without database integration
+
+## 🔮 Future Scope
+- Membership management system
+- Digital library e-card
+- Personalized recommendations and borrowing features
+
+> Note: In the current version, only the chatbot functionality is active.  
+> Membership and library e-card features are planned for future development.
+
+
+
 ## 📁 Project Structure
 
 ```text
